@@ -1,0 +1,354 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import apiService from '../../services/api';
+import './Dashboard.css';
+
+const Dashboard = () => {
+  const { user, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [dailySummary, setDailySummary] = useState(null);
+  const [nutritionGoals, setNutritionGoals] = useState(null);
+  const [userStats, setUserStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [summaryData, goalsData, statsData] = await Promise.all([
+        apiService.getDailySummary().catch(() => null),
+        apiService.getNutritionGoals().catch(() => null),
+        apiService.getUserStats().catch(() => null)
+      ]);
+
+      setDailySummary(summaryData);
+      setNutritionGoals(goalsData);
+      setUserStats(statsData);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      setError('Error al cargar los datos del dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const calculateProgress = (current, goal) => {
+    if (!goal || goal === 0) return 0;
+    return Math.min((current / goal) * 100, 100);
+  };
+
+  const renderOverview = () => (
+    <div className="overview-content">
+      <div className="welcome-section">
+        <h2>¡Hola, {user?.profile?.full_name || user?.username}!</h2>
+        <p>{formatDate(new Date())}</p>
+      </div>
+
+      {loading ? (
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Cargando datos...</p>
+        </div>
+      ) : error ? (
+        <div className="error-state">
+          <p>{error}</p>
+          <button onClick={loadDashboardData} className="retry-button">
+            Reintentar
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Resumen nutricional */}
+          <div className="stats-grid">
+            <div className="stat-card calories">
+              <div className="stat-header">
+                <h3>Calorías</h3>
+                <span className="stat-icon">🔥</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-number">
+                  {dailySummary?.total_calories?.toFixed(0) || 0}
+                </div>
+                <div className="stat-goal">
+                  / {nutritionGoals?.calories?.toFixed(0) || 0} kcal
+                </div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill"
+                    style={{ 
+                      width: `${calculateProgress(
+                        dailySummary?.total_calories || 0, 
+                        nutritionGoals?.calories || 0
+                      )}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-card protein">
+              <div className="stat-header">
+                <h3>Proteínas</h3>
+                <span className="stat-icon">🥩</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-number">
+                  {dailySummary?.total_protein?.toFixed(1) || 0}
+                </div>
+                <div className="stat-goal">
+                  / {nutritionGoals?.protein?.toFixed(1) || 0} g
+                </div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill"
+                    style={{ 
+                      width: `${calculateProgress(
+                        dailySummary?.total_protein || 0, 
+                        nutritionGoals?.protein || 0
+                      )}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-card carbs">
+              <div className="stat-header">
+                <h3>Carbohidratos</h3>
+                <span className="stat-icon">🍞</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-number">
+                  {dailySummary?.total_carbs?.toFixed(1) || 0}
+                </div>
+                <div className="stat-goal">
+                  / {nutritionGoals?.carbs?.toFixed(1) || 0} g
+                </div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill"
+                    style={{ 
+                      width: `${calculateProgress(
+                        dailySummary?.total_carbs || 0, 
+                        nutritionGoals?.carbs || 0
+                      )}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-card fats">
+              <div className="stat-header">
+                <h3>Grasas</h3>
+                <span className="stat-icon">🥑</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-number">
+                  {dailySummary?.total_fats?.toFixed(1) || 0}
+                </div>
+                <div className="stat-goal">
+                  / {nutritionGoals?.fats?.toFixed(1) || 0} g
+                </div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill"
+                    style={{ 
+                      width: `${calculateProgress(
+                        dailySummary?.total_fats || 0, 
+                        nutritionGoals?.fats || 0
+                      )}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-card water">
+              <div className="stat-header">
+                <h3>Agua</h3>
+                <span className="stat-icon">💧</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-number">
+                  {(dailySummary?.total_water || 0) / 1000}
+                </div>
+                <div className="stat-goal">
+                  / {(nutritionGoals?.water || 0) / 1000} L
+                </div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill"
+                    style={{ 
+                      width: `${calculateProgress(
+                        dailySummary?.total_water || 0, 
+                        nutritionGoals?.water || 0
+                      )}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-card entries">
+              <div className="stat-header">
+                <h3>Registros</h3>
+                <span className="stat-icon">📝</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-number">
+                  {userStats?.total_food_entries || 0}
+                </div>
+                <div className="stat-goal">comidas registradas</div>
+                <div className="stat-number small">
+                  {userStats?.total_water_entries || 0}
+                </div>
+                <div className="stat-goal">vasos de agua</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Acciones rápidas */}
+          <div className="quick-actions">
+            <h3>Acciones Rápidas</h3>
+            <div className="action-buttons">
+              <button 
+                className="action-button food"
+                onClick={() => setActiveTab('nutrition')}
+              >
+                <span className="action-icon">🍽️</span>
+                <span>Registrar Comida</span>
+              </button>
+              <button 
+                className="action-button water"
+                onClick={() => setActiveTab('nutrition')}
+              >
+                <span className="action-icon">💧</span>
+                <span>Registrar Agua</span>
+              </button>
+              <button 
+                className="action-button analytics"
+                onClick={() => setActiveTab('analytics')}
+              >
+                <span className="action-icon">📊</span>
+                <span>Ver Análisis</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  const renderNutrition = () => (
+    <div className="nutrition-content">
+      <h2>Seguimiento Nutricional</h2>
+      <p>Funcionalidad de nutrición en desarrollo...</p>
+    </div>
+  );
+
+  const renderAnalytics = () => (
+    <div className="analytics-content">
+      <h2>Análisis y Estadísticas</h2>
+      <p>Dashboard de análisis en desarrollo...</p>
+    </div>
+  );
+
+  const renderSettings = () => (
+    <div className="settings-content">
+      <h2>Configuración</h2>
+      <div className="settings-section">
+        <h3>Perfil de Usuario</h3>
+        <div className="user-info">
+          <p><strong>Nombre:</strong> {user?.profile?.full_name || 'No especificado'}</p>
+          <p><strong>Email:</strong> {user?.email}</p>
+          <p><strong>Usuario:</strong> {user?.username}</p>
+          <p><strong>Edad:</strong> {user?.profile?.age || 'No especificado'} años</p>
+          <p><strong>Peso:</strong> {user?.profile?.weight || 'No especificado'} kg</p>
+          <p><strong>Altura:</strong> {user?.profile?.height || 'No especificado'} cm</p>
+          <p><strong>Nivel de actividad:</strong> {user?.profile?.activity_level || 'No especificado'}</p>
+          <p><strong>Objetivo:</strong> {user?.profile?.goal || 'No especificado'}</p>
+        </div>
+        <button className="edit-profile-button">
+          Editar Perfil
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="dashboard">
+      <header className="dashboard-header">
+        <div className="header-content">
+          <div className="logo">
+            <h1>RehabiLife</h1>
+          </div>
+          <nav className="main-nav">
+            <button 
+              className={`nav-button ${activeTab === 'overview' ? 'active' : ''}`}
+              onClick={() => setActiveTab('overview')}
+            >
+              <span className="nav-icon">🏠</span>
+              Inicio
+            </button>
+            <button 
+              className={`nav-button ${activeTab === 'nutrition' ? 'active' : ''}`}
+              onClick={() => setActiveTab('nutrition')}
+            >
+              <span className="nav-icon">🍽️</span>
+              Nutrición
+            </button>
+            <button 
+              className={`nav-button ${activeTab === 'analytics' ? 'active' : ''}`}
+              onClick={() => setActiveTab('analytics')}
+            >
+              <span className="nav-icon">📊</span>
+              Análisis
+            </button>
+            <button 
+              className={`nav-button ${activeTab === 'settings' ? 'active' : ''}`}
+              onClick={() => setActiveTab('settings')}
+            >
+              <span className="nav-icon">⚙️</span>
+              Configuración
+            </button>
+          </nav>
+          <button className="logout-button" onClick={handleLogout}>
+            <span className="logout-icon">🚪</span>
+            Salir
+          </button>
+        </div>
+      </header>
+
+      <main className="dashboard-main">
+        <div className="main-content">
+          {activeTab === 'overview' && renderOverview()}
+          {activeTab === 'nutrition' && renderNutrition()}
+          {activeTab === 'analytics' && renderAnalytics()}
+          {activeTab === 'settings' && renderSettings()}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;

@@ -2,10 +2,13 @@
 
 .App {
   min-height: 100vh;
+  width: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
 }
 
 /* Estado de carga de la aplicación */
@@ -45,12 +48,22 @@
 /* Reset de estilos básicos */
 * {
   box-sizing: border-box;
-}
-
-body {
   margin: 0;
   padding: 0;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
   background: #f8fafc;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
 }
 
 /* Estilos para botones globales */

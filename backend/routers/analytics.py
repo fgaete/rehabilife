@@ -29,6 +29,18 @@ async def create_daily_stats(stats_data: DailyStatsCreate, current_user: User = 
         # Actualizar existente
         if stats_data.health_metrics:
             existing_stats.health_metrics = stats_data.health_metrics
+        if stats_data.activity_metrics:
+            # Combinar métricas de actividad existentes con las nuevas
+            current_activity = existing_stats.activity_metrics or ActivityMetrics()
+            new_activity = stats_data.activity_metrics
+            
+            existing_stats.activity_metrics = ActivityMetrics(
+                gym_sessions=current_activity.gym_sessions + (new_activity.gym_sessions or 0),
+                cardio_minutes=current_activity.cardio_minutes + (new_activity.cardio_minutes or 0),
+                strength_training_minutes=current_activity.strength_training_minutes + (new_activity.strength_training_minutes or 0),
+                steps=new_activity.steps or current_activity.steps,
+                calories_burned=(current_activity.calories_burned or 0) + (new_activity.calories_burned or 0)
+            )
         if stats_data.notes:
             existing_stats.notes = stats_data.notes
         existing_stats.updated_at = datetime.utcnow()
@@ -48,6 +60,7 @@ async def create_daily_stats(stats_data: DailyStatsCreate, current_user: User = 
             date=target_date,
             health_metrics=stats_data.health_metrics or {},
             nutrition_metrics=nutrition_metrics,
+            activity_metrics=stats_data.activity_metrics or ActivityMetrics(),
             notes=stats_data.notes
         )
         await daily_stats.insert()

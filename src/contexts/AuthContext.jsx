@@ -42,8 +42,9 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, user: response.user };
     } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
+      const errorMessage = error?.message || error?.detail || (typeof error === 'string' ? error : 'Error al registrar usuario');
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -63,8 +64,9 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, user: userData };
     } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
+      const errorMessage = error?.message || error?.detail || (typeof error === 'string' ? error : 'Error al iniciar sesión');
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -88,8 +90,9 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, user: updatedUser };
     } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
+      const errorMessage = error?.message || error?.detail || (typeof error === 'string' ? error : 'Error al actualizar perfil');
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -114,6 +117,11 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  // Alias para updateProfile para mantener consistencia
+  const updateUser = (userData) => {
+    setUser(userData);
+  };
+
   const value = {
     user,
     loading,
@@ -123,6 +131,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateProfile,
+    updateUser,
     refreshUser,
     clearError,
   };

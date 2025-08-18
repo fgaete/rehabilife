@@ -91,10 +91,12 @@ class GoalProgress(BaseModel):
 class DailyStatsCreate(BaseModel):
     date: Optional[Date] = None
     health_metrics: Optional[HealthMetric] = None
+    activity_metrics: Optional[ActivityMetrics] = None
     notes: Optional[str] = None
 
 class DailyStatsUpdate(BaseModel):
     health_metrics: Optional[HealthMetric] = None
+    activity_metrics: Optional[ActivityMetrics] = None
     notes: Optional[str] = None
 
 class DailyStatsResponse(BaseModel):

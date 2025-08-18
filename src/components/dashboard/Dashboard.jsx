@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import apiService from '../../services/api';
+import EditProfile from './EditProfile';
+import NutritionTracker from './NutritionTracker';
+import ExerciseTracker from './ExerciseTracker';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -11,6 +14,7 @@ const Dashboard = () => {
   const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -227,44 +231,15 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Acciones rápidas */}
-          <div className="quick-actions">
-            <h3>Acciones Rápidas</h3>
-            <div className="action-buttons">
-              <button 
-                className="action-button food"
-                onClick={() => setActiveTab('nutrition')}
-              >
-                <span className="action-icon">🍽️</span>
-                <span>Registrar Comida</span>
-              </button>
-              <button 
-                className="action-button water"
-                onClick={() => setActiveTab('nutrition')}
-              >
-                <span className="action-icon">💧</span>
-                <span>Registrar Agua</span>
-              </button>
-              <button 
-                className="action-button analytics"
-                onClick={() => setActiveTab('analytics')}
-              >
-                <span className="action-icon">📊</span>
-                <span>Ver Análisis</span>
-              </button>
-            </div>
-          </div>
+
         </>
       )}
     </div>
   );
 
-  const renderNutrition = () => (
-    <div className="nutrition-content">
-      <h2>Seguimiento Nutricional</h2>
-      <p>Funcionalidad de nutrición en desarrollo...</p>
-    </div>
-  );
+  const renderNutrition = () => <NutritionTracker />;
+
+  const renderExercise = () => <ExerciseTracker />;
 
   const renderAnalytics = () => (
     <div className="analytics-content">
@@ -273,22 +248,48 @@ const Dashboard = () => {
     </div>
   );
 
+  // Funciones de traducción
+  const translateActivityLevel = (level) => {
+    const translations = {
+      'sedentary': 'Sedentario (poco o ningún ejercicio)',
+      'light': 'Ligero (ejercicio ligero 1-3 días/semana)',
+      'moderate': 'Moderado (ejercicio moderado 3-5 días/semana)',
+      'active': 'Activo (ejercicio intenso 6-7 días/semana)',
+      'very_active': 'Muy activo (ejercicio muy intenso, trabajo físico)'
+    };
+    return translations[level] || level || 'No especificado';
+  };
+
+  const translateGoal = (goal) => {
+    const translations = {
+      'weight_loss': 'Perder peso',
+      'weight_gain': 'Ganar peso',
+      'maintain': 'Mantener peso',
+      'muscle_gain': 'Ganar músculo',
+      'health': 'Mejorar salud general'
+    };
+    return translations[goal] || goal || 'No especificado';
+  };
+
   const renderSettings = () => (
     <div className="settings-content">
       <h2>Configuración</h2>
       <div className="settings-section">
         <h3>Perfil de Usuario</h3>
         <div className="user-info">
-          <p><strong>Nombre:</strong> {user?.profile?.full_name || 'No especificado'}</p>
+          <p><strong>Nombre:</strong> {user?.profile?.full_name || user?.full_name || 'No especificado'}</p>
           <p><strong>Email:</strong> {user?.email}</p>
           <p><strong>Usuario:</strong> {user?.username}</p>
-          <p><strong>Edad:</strong> {user?.profile?.age || 'No especificado'} años</p>
-          <p><strong>Peso:</strong> {user?.profile?.weight || 'No especificado'} kg</p>
-          <p><strong>Altura:</strong> {user?.profile?.height || 'No especificado'} cm</p>
-          <p><strong>Nivel de actividad:</strong> {user?.profile?.activity_level || 'No especificado'}</p>
-          <p><strong>Objetivo:</strong> {user?.profile?.goal || 'No especificado'}</p>
+          <p><strong>Edad:</strong> {user?.profile?.age ? `${user.profile.age} años` : 'No especificado'}</p>
+          <p><strong>Peso:</strong> {user?.profile?.weight ? `${user.profile.weight} kg` : 'No especificado'}</p>
+          <p><strong>Altura:</strong> {user?.profile?.height ? `${user.profile.height} cm` : 'No especificado'}</p>
+          <p><strong>Nivel de actividad:</strong> {translateActivityLevel(user?.profile?.activity_level)}</p>
+          <p><strong>Objetivo:</strong> {translateGoal(user?.profile?.goal)}</p>
         </div>
-        <button className="edit-profile-button">
+        <button 
+          className="edit-profile-button"
+          onClick={() => setShowEditProfile(true)}
+        >
           Editar Perfil
         </button>
       </div>
@@ -318,6 +319,13 @@ const Dashboard = () => {
               Nutrición
             </button>
             <button 
+              className={`nav-button ${activeTab === 'exercise' ? 'active' : ''}`}
+              onClick={() => setActiveTab('exercise')}
+            >
+              <span className="nav-icon">💪</span>
+              Ejercicio
+            </button>
+            <button 
               className={`nav-button ${activeTab === 'analytics' ? 'active' : ''}`}
               onClick={() => setActiveTab('analytics')}
             >
@@ -342,11 +350,22 @@ const Dashboard = () => {
       <main className="dashboard-main">
         <div className="main-content">
           {activeTab === 'overview' && renderOverview()}
-          {activeTab === 'nutrition' && renderNutrition()}
-          {activeTab === 'analytics' && renderAnalytics()}
-          {activeTab === 'settings' && renderSettings()}
+        {activeTab === 'nutrition' && renderNutrition()}
+        {activeTab === 'exercise' && renderExercise()}
+        {activeTab === 'analytics' && renderAnalytics()}
+        {activeTab === 'settings' && renderSettings()}
         </div>
       </main>
+
+      {showEditProfile && (
+        <EditProfile
+          onClose={() => setShowEditProfile(false)}
+          onSave={() => {
+            setShowEditProfile(false);
+            loadDashboardData(); // Recargar datos del dashboard
+          }}
+        />
+      )}
     </div>
   );
 };

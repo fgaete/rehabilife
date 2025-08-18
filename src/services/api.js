@@ -116,26 +116,19 @@ class ApiService {
   }
 
   async login(credentials) {
-    // FastAPI espera form data para OAuth2PasswordRequestForm
-    const formData = new FormData();
-    formData.append('username', credentials.email);
-    formData.append('password', credentials.password);
-
-    const response = await fetch(`${this.baseURL}/api/auth/login`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await this.handleResponse(response);
+    const response = await this.post('/api/auth/login', {
+      email: credentials.email,
+      password: credentials.password
+    }, { includeAuth: false });
     
-    if (data.access_token) {
-      this.setToken(data.access_token);
+    if (response.access_token) {
+      this.setToken(response.access_token);
       // Obtener datos del usuario
       const userData = await this.getCurrentUser();
       localStorage.setItem('user_data', JSON.stringify(userData));
     }
     
-    return data;
+    return response;
   }
 
   async getCurrentUser() {
@@ -168,22 +161,22 @@ class ApiService {
 
   async getNutritionEntries(params = {}) {
     const queryString = new URLSearchParams(params).toString();
-    const endpoint = `/nutrition/entries${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `/api/nutrition/food${queryString ? `?${queryString}` : ''}`;
     return this.get(endpoint);
   }
 
   async getDailySummary(date = null) {
-    const params = date ? `?date=${date}` : '';
-    return this.get(`/nutrition/daily-summary${params}`);
+    const params = date ? `?target_date=${date}` : '';
+    return this.get(`/api/nutrition/daily-summary${params}`);
   }
 
   async getNutritionAdvice(date = null) {
-    const params = date ? `?date=${date}` : '';
-    return this.get(`/nutrition/advice${params}`);
+    const params = date ? `?target_date=${date}` : '';
+    return this.get(`/api/nutrition/advice${params}`);
   }
 
   async deleteNutritionEntry(entryId, entryType) {
-    return this.delete(`/nutrition/${entryType}/${entryId}`);
+    return this.delete(`/api/nutrition/${entryType}/${entryId}`);
   }
 
   async getNutritionGoals() {

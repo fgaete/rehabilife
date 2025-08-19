@@ -26,7 +26,8 @@ const DiaryTab = () => {
     name: '',
     quantity: '',
     unit: 'gramos',
-    meal_type: 'breakfast'
+    meal_type: 'breakfast',
+    category: 'protein'
   });
 
   const [waterForm, setWaterForm] = useState({
@@ -146,7 +147,8 @@ const DiaryTab = () => {
         name: record.name,
         quantity: record.quantity.toString(),
         unit: record.unit,
-        meal_type: record.meal_type
+        meal_type: record.meal_type,
+        category: record.category || 'protein'
       });
     } else if (type === 'water') {
       setWaterForm({
@@ -163,8 +165,11 @@ const DiaryTab = () => {
     try {
       if (type === 'food') {
         const data = {
-          ...foodForm,
-          quantity: parseFloat(foodForm.quantity)
+          food_name: foodForm.name,
+          quantity: parseFloat(foodForm.quantity),
+          unit: foodForm.unit,
+          meal_type: foodForm.meal_type,
+          category: foodForm.category
         };
         
         if (editingRecord) {
@@ -215,7 +220,7 @@ const DiaryTab = () => {
       }
       
       // Resetear formularios
-      setFoodForm({ name: '', quantity: '', unit: 'gramos', meal_type: 'breakfast' });
+      setFoodForm({ name: '', quantity: '', unit: 'gramos', meal_type: 'breakfast', category: 'protein' });
       setWaterForm({ amount: '', notes: '' });
       setExerciseForm({ exercise_type: 'gym', duration: '', intensity: 'moderate', notes: '' });
       setLeisureForm({ activity_type: 'work', duration: '', notes: '' });
@@ -319,6 +324,21 @@ const DiaryTab = () => {
                     <option value="dinner">Cena</option>
                     <option value="snack">Snack</option>
                   </select>
+                  <select
+                    value={foodForm.category}
+                    onChange={(e) => setFoodForm({ ...foodForm, category: e.target.value })}
+                  >
+                    <option value="protein">Proteínas</option>
+                    <option value="carbs">Carbohidratos</option>
+                    <option value="fats">Grasas</option>
+                    <option value="vegetables">Vegetales</option>
+                    <option value="fruits">Frutas</option>
+                    <option value="dairy">Lácteos</option>
+                    <option value="beverages">Bebidas</option>
+                    <option value="alcohol">Alcohol</option>
+                    <option value="processed">Procesados</option>
+                    <option value="supplements">Suplementos</option>
+                  </select>
                 </div>
                 <button type="submit" disabled={submitting}>
                   {submitting ? 'Guardando...' : (editingRecord ? 'Actualizar' : 'Registrar')}
@@ -335,13 +355,14 @@ const DiaryTab = () => {
                   <th>Alimento</th>
                   <th>Cantidad</th>
                   <th>Tipo de Comida</th>
+                  <th>Categoría</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {records.food.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="no-records">No hay registros de alimentación</td>
+                    <td colSpan="6" className="no-records">No hay registros de alimentación</td>
                   </tr>
                 ) : (
                   records.food.map(record => (
@@ -350,6 +371,7 @@ const DiaryTab = () => {
                       <td>{record.name}</td>
                       <td>{record.quantity} {record.unit}</td>
                       <td>{record.meal_type}</td>
+                      <td>{record.category}</td>
                       <td>
                         <button 
                           className="edit-btn"
@@ -472,11 +494,26 @@ const DiaryTab = () => {
                     value={exerciseForm.exercise_type}
                     onChange={(e) => setExerciseForm({ ...exerciseForm, exercise_type: e.target.value })}
                   >
-                    <option value="gym">Gimnasio</option>
-                    <option value="cardio">Cardio</option>
-                    <option value="yoga">Yoga</option>
-                    <option value="swimming">Natación</option>
-                    <option value="sports">Deportes</option>
+                    <option value="gym">🏋️ Gimnasio</option>
+                    <option value="cardio">🏃 Cardio/Running</option>
+                    <option value="yoga">🧘 Yoga</option>
+                    <option value="swimming">🏊 Natación</option>
+                    <option value="cycling">🚴 Ciclismo</option>
+                    <option value="walking">🚶 Caminata</option>
+                    <option value="dancing">💃 Baile</option>
+                    <option value="martial_arts">🥋 Artes Marciales</option>
+                    <option value="tennis">🎾 Tenis</option>
+                    <option value="football">⚽ Fútbol</option>
+                    <option value="basketball">🏀 Básquetbol</option>
+                    <option value="volleyball">🏐 Voleibol</option>
+                    <option value="climbing">🧗 Escalada</option>
+                    <option value="pilates">🤸 Pilates</option>
+                    <option value="crossfit">💪 CrossFit</option>
+                    <option value="boxing">🥊 Boxeo</option>
+                    <option value="hiking">🥾 Senderismo</option>
+                    <option value="skateboarding">🛹 Skateboard</option>
+                    <option value="surfing">🏄 Surf</option>
+                    <option value="other">🏃 Otro</option>
                   </select>
                   <input
                     type="number"
@@ -641,6 +678,60 @@ const DiaryTab = () => {
         </div>
       </div>
       
+      {/* Resumen del Día */}
+      <div className="daily-summary">
+        <h3>📊 Resumen del Día</h3>
+        <div className="summary-cards">
+          <div className="summary-card">
+            <div className="summary-icon">🍽️</div>
+            <div className="summary-content">
+              <h4>Alimentación</h4>
+              <p>{records.food.filter(record => {
+                const today = new Date().toDateString();
+                const recordDate = new Date(record.created_at).toDateString();
+                return recordDate === today;
+              }).length} registros hoy</p>
+            </div>
+          </div>
+          
+          <div className="summary-card">
+            <div className="summary-icon">💧</div>
+            <div className="summary-content">
+              <h4>Hidratación</h4>
+              <p>{records.water.filter(record => {
+                const today = new Date().toDateString();
+                const recordDate = new Date(record.created_at).toDateString();
+                return recordDate === today;
+              }).reduce((total, record) => total + record.amount, 0)} ml hoy</p>
+            </div>
+          </div>
+          
+          <div className="summary-card">
+            <div className="summary-icon">🏋️</div>
+            <div className="summary-content">
+              <h4>Ejercicio</h4>
+              <p>{records.exercise.filter(record => {
+                const today = new Date().toDateString();
+                const recordDate = new Date(record.date).toDateString();
+                return recordDate === today;
+              }).reduce((total, record) => total + (record.cardio_minutes || 0) + (record.strength_training_minutes || 0), 0)} min hoy</p>
+            </div>
+          </div>
+          
+          <div className="summary-card">
+            <div className="summary-icon">🎮</div>
+            <div className="summary-content">
+              <h4>Ocio</h4>
+              <p>{records.leisure.filter(record => {
+                const today = new Date().toDateString();
+                const recordDate = new Date(record.date).toDateString();
+                return recordDate === today;
+              }).reduce((total, record) => total + (record.work_minutes || 0) + (record.study_minutes || 0) + (record.leisure_minutes || 0) + (record.social_minutes || 0) + (record.rest_minutes || 0), 0)} min hoy</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Gráfico Semanal */}
       <WeeklyChart />
     </div>

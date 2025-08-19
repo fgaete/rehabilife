@@ -43,8 +43,8 @@ class FoodEntry(Document):
     category: FoodCategory
     nutrition: NutritionInfo = Field(default_factory=NutritionInfo)
     notes: Optional[str] = None
-    date: datetime = Field(default_factory=datetime.utcnow, index=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    date: datetime = Field(default_factory=datetime.now, index=True)
+    created_at: datetime = Field(default_factory=datetime.now)
     
     class Settings:
         name = "food_entries"
@@ -58,8 +58,8 @@ class FoodEntry(Document):
 class WaterEntry(Document):
     user_id: str = Field(..., index=True)
     amount: float  # en ml
-    date: datetime = Field(default_factory=datetime.utcnow, index=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    date: datetime = Field(default_factory=datetime.now, index=True)
+    created_at: datetime = Field(default_factory=datetime.now)
     
     class Settings:
         name = "water_entries"

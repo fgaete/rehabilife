@@ -48,7 +48,7 @@ async def create_daily_stats(stats_data: DailyStatsCreate, current_user: User = 
             )
         if stats_data.notes:
             existing_stats.notes = stats_data.notes
-        existing_stats.updated_at = datetime.utcnow()
+        existing_stats.updated_at = datetime.now()
         
         # Actualizar métricas nutricionales automáticamente
         nutrition_metrics = await _calculate_nutrition_metrics(str(current_user.id), target_date)
@@ -202,7 +202,7 @@ async def update_daily_stats(
     for field, value in update_data.items():
         setattr(daily_stats, field, value)
     
-    daily_stats.updated_at = datetime.utcnow()
+    daily_stats.updated_at = datetime.now()
     await daily_stats.save()
     
     return DailyStatsResponse(

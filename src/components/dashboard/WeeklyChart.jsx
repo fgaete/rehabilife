@@ -14,9 +14,18 @@ const WeeklyChart = () => {
   const loadWeeklyData = async () => {
     setLoading(true);
     try {
-      // Obtener datos de las últimas 4 semanas
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 28); // 4 semanas atrás
+      // Obtener datos de las últimas 4 semanas terminando en la semana actual
+      const today = new Date();
+      const currentDayOfWeek = today.getDay(); // 0 = domingo, 1 = lunes, etc.
+      
+      // Calcular el inicio de la semana actual (lunes)
+      const startOfCurrentWeek = new Date(today);
+      const daysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // Si es domingo, restar 6 días
+      startOfCurrentWeek.setDate(today.getDate() - daysToSubtract);
+      
+      // Calcular el inicio de las 4 semanas (3 semanas completas atrás + semana actual)
+      const startDate = new Date(startOfCurrentWeek);
+      startDate.setDate(startOfCurrentWeek.getDate() - 21); // 3 semanas atrás
 
       // Cargar datos de alimentación
       const foodData = await apiService.getFoodEntries();
@@ -44,8 +53,13 @@ const WeeklyChart = () => {
       const weekEnd = new Date(currentDate);
       weekEnd.setDate(weekEnd.getDate() + 6);
 
+      // Formatear las fechas para mostrar
+      const formatDate = (date) => {
+        return `${date.getDate()}/${date.getMonth() + 1}`;
+      };
+
       const weekData = {
-        week: `Semana ${i + 1}`,
+        week: `${formatDate(weekStart)} - ${formatDate(weekEnd)}`,
         startDate: weekStart.toISOString().split('T')[0],
         endDate: weekEnd.toISOString().split('T')[0],
         food: 0,

@@ -23,9 +23,9 @@ def get_password_hash(password):
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
+        expire = datetime.now() + timedelta(minutes=settings.access_token_expire_minutes)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
@@ -128,7 +128,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         )
     
     # Actualizar último login
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now()
     await user.save()
     
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
@@ -159,7 +159,7 @@ async def login(user_data: UserLogin):
         )
     
     # Actualizar último login
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now()
     await user.save()
     
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)

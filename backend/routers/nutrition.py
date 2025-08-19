@@ -191,6 +191,58 @@ async def get_daily_nutrition_summary(
         water_entries=water_responses
     )
 
+@router.put("/food/{food_id}", response_model=FoodEntryResponse)
+async def update_food_entry(food_id: str, food_data: FoodEntryCreate, current_user: User = Depends(get_current_active_user)):
+    """Actualizar entrada de comida"""
+    food_entry = await FoodEntry.get(food_id)
+    
+    if not food_entry or food_entry.user_id != str(current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Entrada de comida no encontrada"
+        )
+    
+    # Actualizar campos
+    for field, value in food_data.dict(exclude_unset=True).items():
+        setattr(food_entry, field, value)
+    
+    await food_entry.save()
+    
+    return FoodEntryResponse(
+        id=str(food_entry.id),
+        food_name=food_entry.food_name,
+        quantity=food_entry.quantity,
+        unit=food_entry.unit,
+        meal_type=food_entry.meal_type,
+        category=food_entry.category,
+        nutrition=food_entry.nutrition,
+        notes=food_entry.notes,
+        date=food_entry.date,
+        created_at=food_entry.created_at
+    )
+
+@router.put("/water/{water_id}", response_model=WaterEntryResponse)
+async def update_water_entry(water_id: str, water_data: WaterEntryCreate, current_user: User = Depends(get_current_active_user)):
+    """Actualizar entrada de agua"""
+    water_entry = await WaterEntry.get(water_id)
+    
+    if not water_entry or water_entry.user_id != str(current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Entrada de agua no encontrada"
+        )
+    
+    # Actualizar campos
+    water_entry.amount = water_data.amount
+    await water_entry.save()
+    
+    return WaterEntryResponse(
+        id=str(water_entry.id),
+        amount=water_entry.amount,
+        date=water_entry.date,
+        created_at=water_entry.created_at
+    )
+
 @router.delete("/food/{food_id}")
 async def delete_food_entry(food_id: str, current_user: User = Depends(get_current_active_user)):
     """Eliminar entrada de comida"""

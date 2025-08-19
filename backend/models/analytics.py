@@ -32,6 +32,11 @@ class ActivityMetrics(BaseModel):
     gym_sessions: int = 0
     cardio_minutes: int = 0
     strength_training_minutes: int = 0
+    work_minutes: int = 0
+    leisure_minutes: int = 0
+    rest_minutes: int = 0
+    study_minutes: int = 0
+    social_minutes: int = 0
     steps: Optional[int] = None
     calories_burned: Optional[float] = None
 

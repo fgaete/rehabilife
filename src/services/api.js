@@ -159,6 +159,34 @@ class ApiService {
     return this.post('/api/nutrition/water', waterData);
   }
 
+  async getFoodEntries(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = `/api/nutrition/food${queryString ? `?${queryString}` : ''}`;
+    return this.get(endpoint);
+  }
+
+  async getWaterEntries(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = `/api/nutrition/water${queryString ? `?${queryString}` : ''}`;
+    return this.get(endpoint);
+  }
+
+  async updateFoodEntry(entryId, foodData) {
+    return this.put(`/api/nutrition/food/${entryId}`, foodData);
+  }
+
+  async updateWaterEntry(entryId, waterData) {
+    return this.put(`/api/nutrition/water/${entryId}`, waterData);
+  }
+
+  async deleteFoodEntry(entryId) {
+    return this.delete(`/api/nutrition/food/${entryId}`);
+  }
+
+  async deleteWaterEntry(entryId) {
+    return this.delete(`/api/nutrition/water/${entryId}`);
+  }
+
   async getNutritionEntries(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = `/api/nutrition/food${queryString ? `?${queryString}` : ''}`;
@@ -203,6 +231,11 @@ class ApiService {
 
   async updateDailyStats(statsId, statsData) {
     return this.put(`/api/analytics/daily-stats/${statsId}`, statsData);
+  }
+
+  async deleteDailyStats(statsId) {
+    const response = await this.delete(`/api/analytics/daily-stats/${statsId}`);
+    return response;
   }
 
   async getGoalsProgress() {

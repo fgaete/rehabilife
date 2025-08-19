@@ -38,6 +38,11 @@ async def create_daily_stats(stats_data: DailyStatsCreate, current_user: User = 
                 gym_sessions=current_activity.gym_sessions + (new_activity.gym_sessions or 0),
                 cardio_minutes=current_activity.cardio_minutes + (new_activity.cardio_minutes or 0),
                 strength_training_minutes=current_activity.strength_training_minutes + (new_activity.strength_training_minutes or 0),
+                work_minutes=current_activity.work_minutes + (new_activity.work_minutes or 0),
+                leisure_minutes=current_activity.leisure_minutes + (new_activity.leisure_minutes or 0),
+                rest_minutes=current_activity.rest_minutes + (new_activity.rest_minutes or 0),
+                study_minutes=current_activity.study_minutes + (new_activity.study_minutes or 0),
+                social_minutes=current_activity.social_minutes + (new_activity.social_minutes or 0),
                 steps=new_activity.steps or current_activity.steps,
                 calories_burned=(current_activity.calories_burned or 0) + (new_activity.calories_burned or 0)
             )
@@ -140,6 +145,42 @@ async def get_daily_stats_by_date(
         created_at=daily_stats.created_at,
         updated_at=daily_stats.updated_at
     )
+
+@router.delete("/daily-stats/{stats_id}")
+async def delete_daily_stats(
+    stats_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Eliminar estadísticas diarias"""
+    try:
+        # Buscar las estadísticas
+        daily_stats = await DailyStats.get(stats_id)
+        
+        if not daily_stats:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Estadísticas no encontradas"
+            )
+        
+        # Verificar que pertenezcan al usuario actual
+        if daily_stats.user_id != str(current_user.id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes permisos para eliminar estas estadísticas"
+            )
+        
+        # Eliminar las estadísticas
+        await daily_stats.delete()
+        
+        return {"message": "Estadísticas eliminadas correctamente"}
+        
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al eliminar estadísticas: {str(e)}"
+        )
 
 @router.put("/daily-stats/{stats_id}", response_model=DailyStatsResponse)
 async def update_daily_stats(

@@ -126,16 +126,24 @@
   box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-.stat-card.calories {
-  border-left-color: #f56565;
+.stat-card.meals {
+  border-left-color: #667eea;
 }
 
-.stat-card.protein {
-  border-left-color: #48bb78;
+.stat-card.breakfast {
+  border-left-color: #ffd93d;
 }
 
-.stat-card.carbs {
-  border-left-color: #ed8936;
+.stat-card.lunch {
+  border-left-color: #fbbf24;
+}
+
+.stat-card.dinner {
+  border-left-color: #60a5fa;
+}
+
+.stat-card.snacks {
+  border-left-color: #a7f3d0;
 }
 
 .stat-card.water {

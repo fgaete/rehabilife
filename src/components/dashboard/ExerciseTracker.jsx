@@ -14,7 +14,6 @@ const ExerciseTracker = () => {
     exercise_type: 'gym',
     duration: '',
     intensity: 'moderate',
-    calories_burned: '',
     notes: ''
   });
   const [submitting, setSubmitting] = useState(false);
@@ -53,41 +52,38 @@ const ExerciseTracker = () => {
 
     try {
       const duration = parseInt(exerciseFormData.duration);
-      const caloriesBurned = parseFloat(exerciseFormData.calories_burned) || 0;
       
-      // Actualizar las métricas de actividad en las estadísticas diarias
+      // Preparar las métricas de actividad basadas en el tipo de ejercicio
+      const currentMetrics = dailyStats?.activity_metrics || {};
+      const newActivityMetrics = { ...currentMetrics };
+
+      if (exerciseFormData.exercise_type === 'gym') {
+        newActivityMetrics.gym_sessions = (currentMetrics.gym_sessions || 0) + 1;
+        newActivityMetrics.strength_training_minutes = (currentMetrics.strength_training_minutes || 0) + duration;
+      } else if (exerciseFormData.exercise_type === 'cardio') {
+        newActivityMetrics.cardio_minutes = (currentMetrics.cardio_minutes || 0) + duration;
+      } else {
+        // Para otros tipos de ejercicio (yoga, natación, deportes, etc.), agregar a cardio
+        newActivityMetrics.cardio_minutes = (currentMetrics.cardio_minutes || 0) + duration;
+      }
+
       const updateData = {
-        health_metrics: {
-          energy_level: null,
-          mood: null,
-          sleep_hours: null,
-          stress_level: null
-        },
+        activity_metrics: newActivityMetrics,
         notes: exerciseFormData.notes
       };
 
-      // Agregar métricas de actividad basadas en el tipo de ejercicio
-      if (exerciseFormData.exercise_type === 'gym') {
-        updateData.activity_metrics = {
-          gym_sessions: (dailyStats?.activity_metrics?.gym_sessions || 0) + 1,
-          strength_training_minutes: (dailyStats?.activity_metrics?.strength_training_minutes || 0) + duration,
-          calories_burned: (dailyStats?.activity_metrics?.calories_burned || 0) + caloriesBurned
-        };
-      } else if (exerciseFormData.exercise_type === 'cardio') {
-        updateData.activity_metrics = {
-          cardio_minutes: (dailyStats?.activity_metrics?.cardio_minutes || 0) + duration,
-          calories_burned: (dailyStats?.activity_metrics?.calories_burned || 0) + caloriesBurned
-        };
+      // Si ya existen estadísticas para hoy, actualizar; si no, crear nuevas
+      if (dailyStats && dailyStats.id) {
+        await apiService.updateDailyStats(dailyStats.id, updateData);
+      } else {
+        await apiService.createDailyStats(updateData);
       }
-
-      await apiService.createDailyStats(updateData);
       
       // Resetear formulario
       setExerciseFormData({
         exercise_type: 'gym',
         duration: '',
         intensity: 'moderate',
-        calories_burned: '',
         notes: ''
       });
       
@@ -198,16 +194,29 @@ const ExerciseTracker = () => {
               </div>
             </div>
 
-            <div className="stat-card calories">
+            <div className="stat-card sessions">
               <div className="stat-header">
-                <h3>Calorías Quemadas</h3>
-                <span className="stat-icon">🔥</span>
+                <h3>Sesiones Totales</h3>
+                <span className="stat-icon">📊</span>
               </div>
               <div className="stat-content">
                 <div className="stat-number">
-                  {Math.round(dailyStats?.activity_metrics?.calories_burned || 0)}
+                  {dailyStats?.activity_metrics?.gym_sessions || 0}
                 </div>
-                <div className="stat-label">kcal hoy</div>
+                <div className="stat-label">sesiones hoy</div>
+              </div>
+            </div>
+
+            <div className="stat-card total-time">
+              <div className="stat-header">
+                <h3>Tiempo Total Ejercicio</h3>
+                <span className="stat-icon">⏱️</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-number">
+                  {(dailyStats?.activity_metrics?.cardio_minutes || 0) + (dailyStats?.activity_metrics?.strength_training_minutes || 0)}
+                </div>
+                <div className="stat-label">minutos hoy</div>
               </div>
             </div>
           </div>
@@ -320,21 +329,7 @@ const ExerciseTracker = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="calories_burned">Calorías Quemadas (opcional)</label>
-                  <input
-                    type="number"
-                    id="calories_burned"
-                    name="calories_burned"
-                    value={exerciseFormData.calories_burned}
-                    onChange={handleExerciseInputChange}
-                    min="0"
-                    step="0.1"
-                    placeholder="200"
-                  />
-                </div>
-              </div>
+
 
               <div className="form-group">
                 <label htmlFor="notes">Notas (opcional)</label>

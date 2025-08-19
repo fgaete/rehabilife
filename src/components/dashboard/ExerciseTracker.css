@@ -130,6 +130,53 @@
   border-left-color: #9f7aea;
 }
 
+.stat-card.sessions {
+  border-left-color: #9f7aea;
+}
+
+.stat-card.total-time {
+  border-left-color: #38b2ac;
+}
+
+.stat-card.work {
+  border-left-color: #4299e1;
+}
+
+.stat-card.leisure {
+  border-left-color: #ed64a6;
+}
+
+.stat-card.rest {
+  border-left-color: #9f7aea;
+}
+
+.stat-card.study {
+  border-left-color: #38b2ac;
+}
+
+.stat-card.social {
+  border-left-color: #f6ad55;
+}
+
+/* Time Categories Section */
+.time-categories {
+  margin-top: 30px;
+}
+
+.time-categories h3 {
+  color: #2d3748;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.time-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
 .stat-card.cardio {
   border-left-color: #f56565;
 }

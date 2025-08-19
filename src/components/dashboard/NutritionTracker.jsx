@@ -203,80 +203,80 @@ const NutritionTracker = () => {
       {activeSection === 'overview' && (
         <div className="nutrition-overview">
           <div className="nutrition-stats">
-            <div className="stat-card calories">
+            <div className="stat-card meals">
               <div className="stat-header">
-                <h3>Calorías</h3>
-                <span className="stat-icon">🔥</span>
+                <h3>Comidas Totales</h3>
+                <span className="stat-icon">🍽️</span>
               </div>
               <div className="stat-content">
                 <div className="stat-number">
-                  {dailySummary?.total_calories?.toFixed(0) || 0}
+                  {(dailySummary?.breakfast_count || 0) + 
+                   (dailySummary?.lunch_count || 0) + 
+                   (dailySummary?.dinner_count || 0) + 
+                   (dailySummary?.snack_count || 0)}
                 </div>
                 <div className="stat-goal">
-                  / {nutritionGoals?.calories?.toFixed(0) || 2000} kcal
-                </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill"
-                    style={{ 
-                      width: `${calculateProgress(
-                        dailySummary?.total_calories || 0, 
-                        nutritionGoals?.calories || 2000
-                      )}%` 
-                    }}
-                  ></div>
+                  comidas registradas hoy
                 </div>
               </div>
             </div>
 
-            <div className="stat-card protein">
+            <div className="stat-card breakfast">
               <div className="stat-header">
-                <h3>Proteínas</h3>
-                <span className="stat-icon">🥩</span>
+                <h3>Desayunos</h3>
+                <span className="stat-icon">🌅</span>
               </div>
               <div className="stat-content">
                 <div className="stat-number">
-                  {dailySummary?.total_protein?.toFixed(1) || 0}
+                  {dailySummary?.breakfast_count || 0}
                 </div>
                 <div className="stat-goal">
-                  / {nutritionGoals?.protein?.toFixed(1) || 150} g
-                </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill"
-                    style={{ 
-                      width: `${calculateProgress(
-                        dailySummary?.total_protein || 0, 
-                        nutritionGoals?.protein || 150
-                      )}%` 
-                    }}
-                  ></div>
+                  desayunos registrados
                 </div>
               </div>
             </div>
 
-            <div className="stat-card carbs">
+            <div className="stat-card lunch">
               <div className="stat-header">
-                <h3>Carbohidratos</h3>
-                <span className="stat-icon">🍞</span>
+                <h3>Almuerzos</h3>
+                <span className="stat-icon">☀️</span>
               </div>
               <div className="stat-content">
                 <div className="stat-number">
-                  {dailySummary?.total_carbs?.toFixed(1) || 0}
+                  {dailySummary?.lunch_count || 0}
                 </div>
                 <div className="stat-goal">
-                  / {nutritionGoals?.carbs?.toFixed(1) || 250} g
+                  almuerzos registrados
                 </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill"
-                    style={{ 
-                      width: `${calculateProgress(
-                        dailySummary?.total_carbs || 0, 
-                        nutritionGoals?.carbs || 250
-                      )}%` 
-                    }}
-                  ></div>
+              </div>
+            </div>
+
+            <div className="stat-card dinner">
+              <div className="stat-header">
+                <h3>Cenas</h3>
+                <span className="stat-icon">🌙</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-number">
+                  {dailySummary?.dinner_count || 0}
+                </div>
+                <div className="stat-goal">
+                  cenas registradas
+                </div>
+              </div>
+            </div>
+
+            <div className="stat-card snacks">
+              <div className="stat-header">
+                <h3>Colaciones</h3>
+                <span className="stat-icon">🍎</span>
+              </div>
+              <div className="stat-content">
+                <div className="stat-number">
+                  {dailySummary?.snack_count || 0}
+                </div>
+                <div className="stat-goal">
+                  colaciones registradas
                 </div>
               </div>
             </div>

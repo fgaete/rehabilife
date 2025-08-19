@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ApiService } from '../../services/api';
+import apiService from '../../services/api';
 import WeeklyChart from './WeeklyChart';
 import './DiaryTab.css';
 
@@ -55,15 +55,15 @@ const DiaryTab = () => {
     setLoading(true);
     try {
       // Cargar registros de comida
-      const foodData = await ApiService.getFoodEntries();
+      const foodData = await apiService.getFoodEntries();
       const recentFood = foodData.slice(0, 10);
 
       // Cargar registros de agua
-      const waterData = await ApiService.getWaterEntries();
+      const waterData = await apiService.getWaterEntries();
       const recentWater = waterData.slice(0, 10);
 
       // Cargar estadísticas diarias para ejercicio y ocio
-      const dailyStatsData = await ApiService.getDailyStats();
+      const dailyStatsData = await apiService.getDailyStats();
       
       // Procesar ejercicios y ocio de las estadísticas diarias
       const exerciseRecords = [];
@@ -122,13 +122,13 @@ const DiaryTab = () => {
 
     try {
       if (type === 'food') {
-        await ApiService.deleteFoodEntry(recordId);
+        await apiService.deleteFoodEntry(recordId);
       } else if (type === 'water') {
-        await ApiService.deleteWaterEntry(recordId);
+        await apiService.deleteWaterEntry(recordId);
       } else if (type === 'exercise' || type === 'leisure') {
         // Para ejercicio y ocio, necesitamos eliminar las estadísticas diarias
         const statsId = recordId.split('-')[0];
-        await ApiService.deleteDailyStats(statsId);
+        await apiService.deleteDailyStats(statsId);
       }
       
       await loadAllRecords();
@@ -168,9 +168,9 @@ const DiaryTab = () => {
         };
         
         if (editingRecord) {
-          await ApiService.updateFoodEntry(editingRecord.record.id, data);
+          await apiService.updateFoodEntry(editingRecord.record.id, data);
         } else {
-          await ApiService.addFoodEntry(data);
+          await apiService.addFoodEntry(data);
         }
       } else if (type === 'water') {
         const data = {
@@ -179,9 +179,9 @@ const DiaryTab = () => {
         };
         
         if (editingRecord) {
-          await ApiService.updateWaterEntry(editingRecord.record.id, data);
+          await apiService.updateWaterEntry(editingRecord.record.id, data);
         } else {
-          await ApiService.addWaterEntry(data);
+          await apiService.addWaterEntry(data);
         }
       } else if (type === 'exercise') {
         const duration = parseInt(exerciseForm.duration);
@@ -199,7 +199,7 @@ const DiaryTab = () => {
           notes: exerciseForm.notes
         };
         
-        await ApiService.createDailyStats(data);
+        await apiService.createDailyStats(data);
       } else if (type === 'leisure') {
         const duration = parseInt(leisureForm.duration);
         const activityMetrics = {};
@@ -211,7 +211,7 @@ const DiaryTab = () => {
           notes: leisureForm.notes
         };
         
-        await ApiService.createDailyStats(data);
+        await apiService.createDailyStats(data);
       }
       
       // Resetear formularios

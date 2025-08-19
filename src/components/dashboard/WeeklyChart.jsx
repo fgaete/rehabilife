@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ApiService } from '../../services/api';
+import apiService from '../../services/api';
 import './WeeklyChart.css';
 
 const WeeklyChart = () => {
@@ -19,9 +19,9 @@ const WeeklyChart = () => {
       startDate.setDate(startDate.getDate() - 28); // 4 semanas atrás
 
       // Cargar datos de alimentación
-      const foodData = await ApiService.getFoodEntries();
-      const waterData = await ApiService.getWaterEntries();
-      const dailyStatsData = await ApiService.getDailyStats();
+      const foodData = await apiService.getFoodEntries();
+      const waterData = await apiService.getWaterEntries();
+      const dailyStatsData = await apiService.getDailyStats();
 
       // Procesar datos por semana
       const weeklyStats = processWeeklyData(foodData, waterData, dailyStatsData, startDate);

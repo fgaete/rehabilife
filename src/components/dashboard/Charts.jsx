@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ApiService } from '../../services/api';
+import apiService from '../../services/api';
 import './Charts.css';
 
 const Charts = () => {
@@ -22,7 +22,7 @@ const Charts = () => {
       setError(null);
 
       // Obtener entradas de nutrición del día actual
-      const nutritionEntries = await ApiService.getNutritionEntries();
+      const nutritionEntries = await apiService.getNutritionEntries();
       
       // Contar comidas por momento del día
       const mealCounts = {
@@ -52,7 +52,7 @@ const Charts = () => {
 
       // Obtener estadísticas de ejercicio del día actual
       try {
-        const dailyStats = await ApiService.getDailyStats();
+        const dailyStats = await apiService.getDailyStats();
         const exerciseStats = {
           gym_sessions: dailyStats?.activity_metrics?.gym_sessions || 0,
           cardio_minutes: dailyStats?.activity_metrics?.cardio_minutes || 0,
@@ -82,7 +82,7 @@ const Charts = () => {
         
         // Datos de comidas
         weeklyPromises.push(
-          ApiService.getFoodEntries().then(entries => {
+          apiService.getFoodEntries().then(entries => {
             const dayEntries = entries.filter(entry => {
               const entryDate = new Date(entry.created_at || entry.date).toISOString().split('T')[0];
               return entryDate === dateStr;
@@ -96,7 +96,7 @@ const Charts = () => {
         
         // Datos de agua
         weeklyWaterPromises.push(
-          ApiService.getWaterEntries().then(entries => {
+          apiService.getWaterEntries().then(entries => {
             const waterEntries = entries.filter(entry => {
               const entryDate = new Date(entry.created_at || entry.date).toISOString().split('T')[0];
               return entryDate === dateStr;
@@ -110,7 +110,7 @@ const Charts = () => {
         
         // Datos de ejercicio
         weeklyExercisePromises.push(
-          ApiService.getDailyStats(dateStr).then(stats => {
+          apiService.getDailyStats(dateStr).then(stats => {
             const totalMinutes = (stats?.activity_metrics?.cardio_minutes || 0) + (stats?.activity_metrics?.strength_training_minutes || 0);
             return {
               date: dateStr,
@@ -207,98 +207,11 @@ const Charts = () => {
     );
   };
 
-  const renderWeeklyChart = () => {
-    if (!weeklyData.length) return null;
 
-    const maxMeals = Math.max(...weeklyData.map(d => d.total_meals || 0), 1);
-    
-    return (
-      <div className="weekly-chart">
-        <h3>Comidas Registradas - Últimos 7 días</h3>
-        <div className="chart-bars">
-          {weeklyData.map((day, index) => {
-            const height = ((day.total_meals || 0) / maxMeals) * 100;
-            return (
-              <div key={index} className="bar-container">
-                <div 
-                  className="bar" 
-                  style={{ 
-                    height: `${Math.max(height, 10)}%`,
-                    backgroundColor: day.total_meals > 5 ? '#e53e3e' : day.total_meals > 3 ? '#ed8936' : '#48bb78'
-                  }}
-                >
-                  <span className="bar-value">{day.total_meals || 0}</span>
-                </div>
-                <span className="bar-label">{day.day}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
 
-  const renderWaterChart = () => {
-    if (!weeklyWaterData.length) return null;
 
-    const maxWater = Math.max(...weeklyWaterData.map(d => d.water_count || 0), 1);
-    
-    return (
-      <div className="weekly-chart">
-        <h3>Consumo de Agua - Últimos 7 días</h3>
-        <div className="chart-bars">
-          {weeklyWaterData.map((day, index) => {
-            const height = ((day.water_count || 0) / maxWater) * 100;
-            return (
-              <div key={index} className="bar-container">
-                <div 
-                  className="bar" 
-                  style={{ 
-                    height: `${Math.max(height, 10)}%`,
-                    backgroundColor: day.water_count > 8 ? '#06b6d4' : day.water_count > 5 ? '#0891b2' : day.water_count > 2 ? '#0e7490' : '#64748b'
-                  }}
-                >
-                  <span className="bar-value">{day.water_count || 0}</span>
-                </div>
-                <span className="bar-label">{day.day}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
 
-  const renderExerciseChart = () => {
-    if (!weeklyExerciseData.length) return null;
 
-    const maxExercise = Math.max(...weeklyExerciseData.map(d => d.exercise_minutes || 0), 1);
-    
-    return (
-      <div className="weekly-chart">
-        <h3>Tiempo de Ejercicio - Últimos 7 días</h3>
-        <div className="chart-bars">
-          {weeklyExerciseData.map((day, index) => {
-            const height = ((day.exercise_minutes || 0) / maxExercise) * 100;
-            return (
-              <div key={index} className="bar-container">
-                <div 
-                  className="bar" 
-                  style={{ 
-                    height: `${Math.max(height, 10)}%`,
-                    backgroundColor: day.exercise_minutes > 60 ? '#10b981' : day.exercise_minutes > 30 ? '#059669' : day.exercise_minutes > 0 ? '#047857' : '#64748b'
-                  }}
-                >
-                  <span className="bar-value">{day.exercise_minutes || 0}</span>
-                </div>
-                <span className="bar-label">{day.day}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
 
   const renderCombinedChart = () => {
     if (!combinedWeeklyData.length) return null;
@@ -528,11 +441,35 @@ const Charts = () => {
         {renderCombinedChart()}
       </div>
       
-      {/* Gráficos Individuales (opcional) */}
-      <div className="charts-grid individual-charts" style={{ marginTop: '2rem' }}>
-        {renderWeeklyChart()}
-        {renderWaterChart()}
-        {renderExerciseChart()}
+      {/* Tabla de Resumen por Categorías */}
+      <div className="summary-table-section">
+        <h3>Resumen Semanal por Categorías</h3>
+        <div className="summary-table">
+          <div className="summary-row">
+            <div className="category-item">
+              <span className="category-icon">🍽️</span>
+              <span className="category-name">Comida</span>
+              <span className="category-value">{weeklyData.reduce((sum, day) => sum + (day.total_meals || 0), 0)} comidas</span>
+            </div>
+            <div className="category-item">
+              <span className="category-icon">💧</span>
+              <span className="category-name">Hidratación</span>
+              <span className="category-value">{weeklyWaterData.reduce((sum, day) => sum + (day.water_count || 0), 0)} vasos</span>
+            </div>
+          </div>
+          <div className="summary-row">
+            <div className="category-item">
+              <span className="category-icon">🏃</span>
+              <span className="category-name">Ejercicio</span>
+              <span className="category-value">{weeklyExerciseData.reduce((sum, day) => sum + (day.exercise_minutes || 0), 0)} min</span>
+            </div>
+            <div className="category-item">
+              <span className="category-icon">🎯</span>
+              <span className="category-name">Ocio</span>
+              <span className="category-value">{combinedWeeklyData.reduce((sum, day) => sum + day.leisure, 0)} min</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
